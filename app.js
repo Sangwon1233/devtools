@@ -4,12 +4,13 @@ const Diff = require('diff');
 const app = express();
 const port = process.env.PORT || 3000;
 
+
 // 미들웨어 설정
 app.use(express.json({ limit: '10mb' })); // JSON 파싱 크기 제한
 app.use(express.urlencoded({ extended: true, limit: '10mb' })); // URL 인코딩 파싱
 
 // 정적 파일 제공 (CSS, JS, 이미지 등)
-app.use('/static', express.static(path.join(__dirname, 'public')));
+app.use('/static', express.static(path.join(__dirname, 'static')));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 // 보안 헤더 설정
