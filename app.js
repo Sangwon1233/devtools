@@ -50,7 +50,15 @@ const tools = [
     { name: 'ipinfo', title: 'IP 주소 정보 확인' },
     { name: 'notepad', title: '온라인 메모장' },
     { name: 'fileconvert', title: '파일 타입 변환기' },
-    { name: 'qrcode', title: 'QR 코드 생성기' }
+    { name: 'qrcode', title: 'QR 코드 생성기' },
+    { name: 'api-tester',     title: 'REST API 퀵 테스터' },
+    { name: 'og-preview',     title: 'Open Graph & Twitter 카드 미리보기' },
+    { name: 'gradient',       title: 'CSS 그라데이션 생성기' },
+    { name: 'docker-lint',    title: 'Dockerfile Linter & 스니펫' },
+    { name: 'gitignore',      title: '.gitignore 생성기' },
+    { name: 'emoji-mosaic',   title: '이모지 모자이크 생성기' },
+    { name: 'identicon',      title: '픽셀 아바타/Identicon' },
+    { name: 'idcard',         title: '가상 신분증/명함 생성기' }
 ];
 
 // 각 도구 페이지 라우트
