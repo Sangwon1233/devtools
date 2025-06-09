@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regex 테스터 - Regular Expression Tester</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+        <!-- 기본 파비콘 (favicon.ico) -->
+    <link rel="icon" type="image/x-icon" href="/static/img/favicon.ico" />
+    
+    <!-- PNG 형식 파비콘 (현대 브라우저용) -->
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/img/favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/img/favicon-32x32.png" />
+    
+    <!-- Apple Touch Icon (iOS 홈 화면 추가용) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/img/apple-icon-180x180.png" />
+    
+    <!-- Android / PWA 매니페스트용 아이콘 -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/img/android-icon-192x192.png" />
+    
+    <!-- Windows 타일용 메타 태그 -->
+    <meta name="msapplication-TileImage" content="/static/img/ms-icon-144x144.png" />
+    <meta name="msapplication-TileColor" content="#6366f1" />
+    
+    <!-- 테마 컬러 (모바일 브라우저 툴바 색상 지정) -->
+    <meta name="theme-color" content="#6366f1" />
+    <link href="../static/css/footer.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #4f46e5;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #3b82f6;
+            --dark-bg: #1e293b;
+            --light-bg: #f8fafc;
+            --border-color: #e2e8f0;
+            --highlight-bg: #fef3c7; /* amber-200 */
+            --highlight-border: #fde68a; /* amber-300 */
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #4f46e5 100%);
+            min-height: 100vh;
+            margin: 0; padding: 0;
+        }
+
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            margin: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255,255,255,0.05) 10px,
+                rgba(255,255,255,0.05) 20px
+            );
+            animation: float 20s linear infinite;
+        }
+        .header .tool-title {
+            font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; position: relative; z-index: 1;
+        }
+        .header .tool-description {
+            font-size: 1.1rem; opacity: 0.9; position: relative; z-index: 1; margin: 0;
+        }
+
+        .tool-section {
+            background: white; padding: 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label {
+            display: block; font-weight: 600; margin-bottom: 0.5rem; color: #374151;
+        }
+        .form-control, .code-textarea { /* Reusing code-textarea style for consistency */
+            width: 100%; padding: 0.75rem 1rem; font-size: 0.95rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px; transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+        .form-control:focus, .code-textarea:focus {
+            outline: none; border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        .code-textarea { min-height: 150px; line-height: 1.5; }
+
+        .regex-input-group {
+            display: flex;
+            align-items: center;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 1.1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background-color: #f8fafc;
+        }
+        .regex-input-group:focus-within {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        .regex-delimiter {
+            padding: 0.75rem 0.5rem;
+            color: #6b7280; /* gray-500 */
+            user-select: none;
+        }
+        #regexPatternInput {
+            flex-grow: 1;
+            border: none; background: transparent;
+            padding: 0.75rem 0;
+            font-size: inherit; font-family: inherit;
+        }
+        #regexPatternInput:focus { outline: none; box-shadow: none; }
+        #regexFlagsInput {
+            border: none; background: transparent;
+            padding: 0.75rem 0.5rem; text-align: left;
+            width: 80px; /* Adjust as needed */
+            font-size: inherit; font-family: inherit;
+        }
+        #regexFlagsInput:focus { outline: none; box-shadow: none; }
+
+        #regexErrorDisplay {
+            background-color: #fee2e2; /* red-100 */
+            color: #991b1b; /* red-800 */
+            border: 1px solid #fecaca; /* red-200 */
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-top: 0.75rem;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+        }
+
+        .results-panel { margin-top: 2rem; }
+        .results-panel h5 { font-weight: 600; margin-bottom: 1rem; color: #374151;}
+        
+        #highlightedTextOutput {
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: #f8fafc;
+            min-height: 100px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            white-space: pre-wrap; /* Preserve whitespace and newlines */
+            word-break: break-all; /* Break long words */
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+        #highlightedTextOutput mark, #highlightedTextOutput .match-highlight {
+            background-color: var(--highlight-bg);
+            border: 1px solid var(--highlight-border);
+            border-radius: 3px;
+            padding: 1px 2px;
+            font-weight: bold;
+            color: #713f12; /* amber-800 */
+        }
+        
+        #matchListContainer { margin-top: 1.5rem; }
+        .match-item {
+            background-color: var(--light-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.75rem;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+        }
+        .match-item strong { color: var(--primary-color); }
+        .match-item .group-item { margin-left: 1.5rem; display: block; }
+        .match-item .group-item .group-index { color: #6b7280; }
+
+        .cheatsheet-toggle {
+            background-color: var(--info-color); color: white; border: none;
+            padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;
+            font-weight: 500; margin-bottom: 0.75rem;
+        }
+         .cheatsheet-toggle:hover { background-color: #2563eb; }
+
+        #cheatsheetPanel {
+            background-color: #f9fafb; padding: 1rem; border-radius: 8px;
+            border: 1px solid var(--border-color); font-size: 0.85rem;
+        }
+        #cheatsheetPanel h6 { font-weight: 600; margin-top:0.75rem; margin-bottom:0.25rem; }
+        #cheatsheetPanel ul { list-style: none; padding-left: 0; }
+        #cheatsheetPanel li { margin-bottom: 0.25rem; }
+        #cheatsheetPanel code { 
+            background-color: #e5e7eb; padding: 1px 4px; border-radius: 3px; 
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+
+
+        .ad-space {
+            background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 12px;
+            padding: 2rem; text-align: center; color: #64748b;
+            margin: 2rem 0; min-height: 150px;
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
+        }
+        .ad-space i { font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5; }
+
+        .hidden { display: none !important; }
+
+        .back-btn {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            z-index: 3;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            text-decoration: none;
+            transform: translateX(-5px);
+        }
+
+        @media (max-width: 768px) {
+            .main-container { margin: 10px; border-radius: 15px; }
+            .header .tool-title { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <a href="/" class="back-btn">
+                <i class="fas fa-arrow-left"></i> 메인으로
+            </a>            
+            <h3 class="tool-title"><i class="fas fa-search-plus"></i> Regex 테스터</h3>
+            <p class="tool-description">정규표현식을 테스트하고 매칭 결과를 실시간으로 확인할 수 있습니다</p>
+        </div>
+
+        <div class="tool-section">
+            <div class="form-group">
+                <label for="regexPatternInput">정규표현식 (Regular Expression)</label>
+                <div class="regex-input-group">
+                    <span class="regex-delimiter">/</span>
+                    <input type="text" id="regexPatternInput" class="form-control-plaintext" placeholder="여기에 정규표현식을 입력하세요">
+                    <span class="regex-delimiter">/</span>
+                    <input type="text" id="regexFlagsInput" class="form-control-plaintext" placeholder="flags" maxlength="10">
+                </div>
+                <div id="regexErrorDisplay" class="hidden"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="testStringInput">테스트 문자열 (Test String)</label>
+                <textarea id="testStringInput" class="code-textarea" rows="8" placeholder="이곳에 테스트할 문자열을 입력하세요..."></textarea>
+            </div>
+            
+            <button id="toggleCheatsheetBtn" class="cheatsheet-toggle btn-sm"><i class="fas fa-book"></i> 정규식 도움말 보기/숨기기</button>
+            <div id="cheatsheetPanel" class="hidden">
+                <h6>자주 사용되는 메타문자:</h6>
+                <ul>
+                    <li><code>.</code> - 줄바꿈 문자를 제외한 모든 단일 문자</li>
+                    <li><code>\d</code> - 숫자 (0-9)</li>
+                    <li><code>\D</code> - 숫자가 아닌 문자</li>
+                    <li><code>\w</code> - 영숫자 문자 (a-z, A-Z, 0-9, _)</li>
+                    <li><code>\W</code> - 영숫자가 아닌 문자</li>
+                    <li><code>\s</code> - 공백 문자 (스페이스, 탭, 줄바꿈 등)</li>
+                    <li><code>\S</code> - 공백이 아닌 문자</li>
+                    <li><code>^</code> - 문자열의 시작 / <code>[^...]</code> - 부정 문자셋</li>
+                    <li><code>$</code> - 문자열의 끝</li>
+                    <li><code>*</code> - 0회 이상 반복</li>
+                    <li><code>+</code> - 1회 이상 반복</li>
+                    <li><code>?</code> - 0 또는 1회 반복 / 욕심쟁이 수량자 뒤에 붙이면 게으른 수량자로 변경</li>
+                    <li><code>{n}</code> - 정확히 n회 반복</li>
+                    <li><code>{n,}</code> - 최소 n회 반복</li>
+                    <li><code>{n,m}</code> - 최소 n회, 최대 m회 반복</li>
+                    <li><code>[...]</code> - 괄호 안의 문자 중 하나</li>
+                    <li><code>(...)</code> - 그룹화 및 캡처</li>
+                    <li><code>(?:...)</code> - 그룹화 (캡처 안함)</li>
+                    <li><code>|</code> - OR 연산자</li>
+                </ul>
+                 <h6>플래그:</h6>
+                <ul>
+                    <li><code>g</code> - 전역 검색 (Global)</li>
+                    <li><code>i</code> - 대소문자 무시 (Ignore case)</li>
+                    <li><code>m</code> - 다중 라인 모드 (Multiline, ^와 $가 각 줄의 시작/끝에 매칭)</li>
+                    <li><code>s</code> - dotall 모드 (.이 줄바꿈 문자도 매칭)</li>
+                    <li><code>u</code> - 유니코드 모드 (Unicode)</li>
+                    <li><code>y</code> - 고정 모드 (Sticky)</li>
+                </ul>
+            </div>
+
+
+            <div class="results-panel">
+                <h5><i class="fas fa-magic"></i> 매칭 결과</h5>
+                <div id="highlightedTextOutput">테스트 문자열을 입력하고 정규표현식을 작성하면 결과가 여기에 표시됩니다.</div>
+                <div id="matchListContainer">
+                    </div>
+            </div>
+        </div>
+
+        <div class="ad-space">
+            <i class="fas fa-ad"></i>
+            <h5>광고 영역</h5>
+            <p>Google AdSense 광고가 여기에 표시됩니다</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="container">
+                <div class="row">
+                    <!-- Contact 컬럼 -->
+                    <div class="col-6 col-md-3 footer-col">
+                        <h5 class="footer-col-title">
+                            <i class="fas fa-address-book" style="margin-right: 8px; color: var(--primary-color);"></i>
+                            Contact
+                        </h5>
+                        <ul class="footer-links">
+                            <li>
+                                <a href="https://github.com/seunghwan94" target="_blank" rel="noopener">
+                                    <i class="fab fa-github"></i> GitHub
+                                </a>
+                            </li>
+                            <li>
+                                <a href="mailto:seunghwan94@gmail.com">
+                                    <i class="fas fa-envelope"></i> seunghwan94@gmail.com
+                                </a>
+                            </li>
+                            <li>
+                                <a href="tel:01091050889">
+                                    <i class="fas fa-phone"></i> 010-9105-0889
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://open.kakao.com/o/sjxp87Af" target="_blank" rel="noopener">
+                                    <i class="fab fa-rocketchat"></i> 카카오톡 오픈채팅
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Projects 컬럼 -->
+                    <div class="col-6 col-md-3 footer-col">
+                        <h5 class="footer-col-title">
+                            <i class="fas fa-rocket" style="margin-right: 8px; color: var(--success-color);"></i>
+                            Projects
+                        </h5>
+                        <ul class="footer-links">
+                            <li>
+                                <a href="https://hof.lshwan.com/" target="_blank" rel="noopener">
+                                    <i class="fas fa-home"></i> 가구의 집
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://www.mplace.site" target="_blank" rel="noopener">
+                                    <i class="fas fa-store"></i> m/place 
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" onclick="return false;" style="opacity: 0.6; cursor: not-allowed;">
+                                    <i class="fas fa-tools"></i> Developer Tools Hub
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Location 컬럼 -->
+                    <div class="col-6 col-md-3 footer-col">
+                        <h5 class="footer-col-title">
+                            <i class="fas fa-map-marker-alt" style="margin-right: 8px; color: var(--info-color);"></i>
+                            Location
+                        </h5>
+                        <div class="location-info">
+                            <div style="margin-bottom: 0.75rem;">
+                                <i class="fas fa-building"></i>
+                                서울시 양천구 신월동<br>
+                                <!-- <span style="margin-left: 24px;">대륭포스트타워 2차 203호</span> -->
+                            </div>
+                            <div style="margin-bottom: 0.75rem;">
+                                <i class="fas fa-phone-alt"></i>
+                                전화번호: 010-9105-0889
+                            </div>
+                            <div>
+                                <i class="fas fa-clock"></i>
+                                평일 09:00 - 18:00
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Follow Us 컬럼 -->
+                    <div class="col-6 col-md-3 footer-col">
+                        <h5 class="footer-col-title">
+                            <i class="fas fa-share-alt" style="margin-right: 8px; color: var(--warning-color);"></i>
+                            Follow Us
+                        </h5>
+                        <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 1rem; line-height: 1.5;">
+                            <!-- 최신 도구와 업데이트 소식을 받아보세요! -->
+                        </p>
+                        <div class="social-icons">
+                            <a href="https://github.com/seunghwan94" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub">
+                                <i class="fab fa-github"></i>
+                            </a>
+                            <a href="https://open.kakao.com/o/sjxp87Af" target="_blank" rel="noopener" aria-label="KakaoTalk" title="카카오톡">
+                                <i class="fab fa-rocketchat"></i>
+                            </a>
+                            <a href="mailto:seunghwan94@gmail.com" aria-label="Email" title="이메일">
+                                <i class="fas fa-envelope"></i>
+                            </a>
+                            <a href="tel:01091050889" aria-label="Phone" title="전화">
+                                <i class="fas fa-phone"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Bottom -->
+                <div class="footer-bottom">
+                    <p>© 2025 Mago Lee Developer Tools. 취미로 개발하는 개발자 💻</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="../static/js/footer.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const regexPatternInput = document.getElementById('regexPatternInput');
+        const regexFlagsInput = document.getElementById('regexFlagsInput');
+        const testStringInput = document.getElementById('testStringInput');
+        const highlightedTextOutput = document.getElementById('highlightedTextOutput');
+        const matchListContainer = document.getElementById('matchListContainer');
+        const regexErrorDisplay = document.getElementById('regexErrorDisplay');
+        const toggleCheatsheetBtn = document.getElementById('toggleCheatsheetBtn');
+        const cheatsheetPanel = document.getElementById('cheatsheetPanel');
+
+        [regexPatternInput, regexFlagsInput, testStringInput].forEach(input => {
+            input.addEventListener('input', performRegexTest);
+        });
+        
+        toggleCheatsheetBtn.addEventListener('click', () => {
+            cheatsheetPanel.classList.toggle('hidden');
+        });
+
+        function escapeHTML(str) {
+            if (typeof str !== 'string') return '';
+            return str.replace(/[&<>"']/g, function (match) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                }[match];
+            });
+        }
+
+        function performRegexTest() {
+            const patternStr = regexPatternInput.value;
+            const flagsStr = regexFlagsInput.value;
+            const testStr = testStringInput.value;
+
+            highlightedTextOutput.innerHTML = escapeHTML(testStr) || '테스트 문자열을 입력하고 정규표현식을 작성하면 결과가 여기에 표시됩니다.';
+            matchListContainer.innerHTML = '';
+            regexErrorDisplay.classList.add('hidden');
+            regexErrorDisplay.textContent = '';
+
+            if (!patternStr) { // No pattern, no test needed.
+                if(testStr) highlightedTextOutput.innerHTML = escapeHTML(testStr);
+                else highlightedTextOutput.textContent = '테스트 문자열을 입력하고 정규표현식을 작성하면 결과가 여기에 표시됩니다.';
+                return;
+            }
+            
+            if (!testStr) { // No test string, can't show matches
+                 matchListContainer.innerHTML = '<p class="text-muted fst-italic">테스트 문자열을 입력하세요.</p>';
+            }
+
+
+            let regex;
+            try {
+                regex = new RegExp(patternStr, flagsStr);
+                regexErrorDisplay.classList.add('hidden');
+            } catch (e) {
+                regexErrorDisplay.textContent = e.message;
+                regexErrorDisplay.classList.remove('hidden');
+                return;
+            }
+
+            if (!testStr) return; // Don't proceed further if no test string
+
+            let matchesFound = false;
+            let highlightedHTML = '';
+            let lastIndex = 0;
+
+            // Using matchAll for robust group capturing and iteration
+            // Note: matchAll always behaves as if 'g' flag is set for iteration.
+            // If 'g' is not in flags, it will yield only the first match. For highlighting all,
+            // we might need to manually handle non-global regex or implicitly add 'g' for highlighting.
+            // For simplicity here, highlighting will follow the regex's global nature.
+            // If regex is not global, matchAll still works fine but just finds the first match.
+
+            // To get all matches for highlighting even if 'g' is not present for that purpose,
+            // we can create a separate regex for highlighting with 'g' if original is not global.
+            let displayRegex = regex;
+            if (patternStr && !regex.global) { // If pattern exists and not global
+                try {
+                     // We need to ensure flags are valid, especially 'd' flag if present
+                    let highlightFlags = flagsStr.includes('g') ? flagsStr : flagsStr + 'g';
+                    // If 'd' flag is present, use it. If not, don't add it.
+                    // ES2022 added 'd' (hasIndices) flag, ensure compatibility or handle
+                    // displayRegex = new RegExp(patternStr, highlightFlags); 
+                    // For simplicity, we'll rely on the user setting 'g' for multiple highlights.
+                    // Or, we can iterate with exec for non-global highlight if needed.
+                    // The current matchAll approach will highlight one if no 'g', all if 'g'.
+                } catch (e) { /* ignore error for temporary display regex */ }
+            }
+
+
+            try {
+                const matches = Array.from(testStr.matchAll(regex)); // Use original regex for match list
+
+                if (matches.length > 0) {
+                    matchesFound = true;
+                    let tempLastIndex = 0;
+                    let builtHighlightedHTML = "";
+
+                    matches.forEach((match, matchIndex) => {
+                        // Build highlighted string
+                        builtHighlightedHTML += escapeHTML(testStr.substring(tempLastIndex, match.index));
+                        builtHighlightedHTML += `<mark>${escapeHTML(match[0])}</mark>`;
+                        tempLastIndex = match.index + match[0].length;
+
+                        // Display individual match details
+                        const matchItem = document.createElement('div');
+                        matchItem.className = 'match-item';
+                        let matchContent = `<strong>매치 ${matchIndex + 1}:</strong> "${escapeHTML(match[0])}" (index: ${match.index})<br>`;
+                        
+                        if (match.groups) { // Named capture groups
+                            matchContent += `<span class="group-item"><strong>명명된 그룹:</strong></span>`;
+                            for (const groupName in match.groups) {
+                                if (match.groups[groupName] !== undefined) {
+                                   matchContent += `<span class="group-item"><span class="group-index">${groupName}:</span> "${escapeHTML(match.groups[groupName])}"</span>`;
+                                }
+                            }
+                        }
+                        // Indexed capture groups (excluding full match at index 0)
+                        if (match.length > 1) {
+                             matchContent += `<span class="group-item"><strong>캡처 그룹:</strong></span>`;
+                            for (let i = 1; i < match.length; i++) {
+                                if (match[i] !== undefined) { // Only show defined groups
+                                   matchContent += `<span class="group-item"><span class="group-index">그룹 ${i}:</span> "${escapeHTML(match[i])}"</span>`;
+                                } else {
+                                   matchContent += `<span class="group-item"><span class="group-index">그룹 ${i}:</span> <em>undefined</em></span>`;
+                                }
+                            }
+                        }
+                        matchItem.innerHTML = matchContent;
+                        matchListContainer.appendChild(matchItem);
+                    });
+                    builtHighlightedHTML += escapeHTML(testStr.substring(tempLastIndex));
+                    highlightedTextOutput.innerHTML = builtHighlightedHTML;
+
+                }
+            } catch (e) {
+                // This catch is for errors during matching with a valid regex (e.g. catastrophic backtracking on complex patterns)
+                regexErrorDisplay.textContent = "매칭 중 오류 발생: " + e.message;
+                regexErrorDisplay.classList.remove('hidden');
+                highlightedTextOutput.innerHTML = escapeHTML(testStr); // Show original string if matching fails
+            }
+
+
+            if (!matchesFound && testStr) {
+                highlightedTextOutput.innerHTML = escapeHTML(testStr); // Ensure original text is shown if no matches
+                matchListContainer.innerHTML = '<p class="text-muted fst-italic">매칭되는 결과가 없습니다.</p>';
+            }
+        }
+        
+        // Initial call to set placeholder or if there's initial text
+        performRegexTest();
+
+    </script>
+</body>
+</html>
