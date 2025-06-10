@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS 그라데이션 생성기 - CSS Gradient Generator</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+        <!-- 기본 파비콘 (favicon.ico) -->
+    <link rel="icon" type="image/x-icon" href="/static/img/favicon.ico" />
+    
+    <!-- PNG 형식 파비콘 (현대 브라우저용) -->
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/img/favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/img/favicon-32x32.png" />
+    
+    <!-- Apple Touch Icon (iOS 홈 화면 추가용) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/img/apple-icon-180x180.png" />
+    
+    <!-- Android / PWA 매니페스트용 아이콘 -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/img/android-icon-192x192.png" />
+    
+    <!-- Windows 타일용 메타 태그 -->
+    <meta name="msapplication-TileImage" content="/static/img/ms-icon-144x144.png" />
+    <meta name="msapplication-TileColor" content="#6366f1" />
+    
+    <!-- 테마 컬러 (모바일 브라우저 툴바 색상 지정) -->
+    <meta name="theme-color" content="#6366f1" />
+    <link href="../static/css/footer.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #0891b2;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #3b82f6;
+            --dark-bg: #1e293b;
+            --light-bg: #f8fafc;
+            --border-color: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #0891b2 100%);
+            min-height: 100vh;
+            margin: 0; padding: 0;
+        }
+
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            margin: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255,255,255,0.05) 10px,
+                rgba(255,255,255,0.05) 20px
+            );
+            animation: float 20s linear infinite;
+        }
+        .header .tool-title {
+            font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; position: relative; z-index: 1;
+        }
+        .header .tool-description {
+            font-size: 1.1rem; opacity: 0.9; position: relative; z-index: 1; margin: 0;
+        }
+
+        .tool-section {
+            background: white; padding: 2rem;
+        }
+        
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 1fr; /* Default single column */
+            gap: 2rem;
+        }
+        @media (min-width: 992px) { /* Two columns for large screens */
+            .content-wrapper { grid-template-columns: minmax(320px, 1.5fr) 2fr; } /* Options panel smaller */
+        }
+
+        .options-panel {
+            background-color: var(--light-bg);
+            padding: 1.5rem; border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        .options-panel h5 { font-weight: 600; margin-bottom: 1rem; color: #374151;}
+
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label {
+            display: block; font-weight: 500; margin-bottom: 0.5rem; color: #374151; font-size: 0.9rem;
+        }
+        .form-control, .form-select, input[type="color"], input[type="range"] {
+            width: 100%; padding: 0.75rem; border: 1px solid var(--border-color);
+            border-radius: 8px; transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            font-size: 0.9rem;
+        }
+        input[type="color"] {
+             min-height: calc(1.5em + 1.5rem + 2px); 
+             padding: 0.25rem 0.375rem;
+        }
+        input[type="range"] { padding: 0; } /* Range inputs don't need vertical padding */
+
+        .form-control:focus, .form-select:focus, input[type="color"]:focus, input[type="range"]:focus {
+            outline: none; border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .color-stop-item {
+            display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;
+            padding: 0.75rem; background-color: #fff; border-radius: 6px; border: 1px solid var(--border-color);
+        }
+        .color-stop-item input[type="color"] { flex: 0 0 50px; padding: 0.1rem; }
+        .color-stop-item input[type="range"] { flex-grow: 1; }
+        .color-stop-item .position-display { font-size: 0.85rem; width: 40px; text-align: right; color: var(--text-muted-light); }
+        .color-stop-item .remove-color-btn {
+            background: none; border: none; color: var(--danger-color); cursor: pointer; font-size: 1rem; padding: 0.25rem;
+        }
+        .color-stop-item .remove-color-btn:hover { color: #a02d2d; }
+
+        .btn-add-color {
+            background-color: var(--primary-color); color: white; border: none;
+            padding: 0.6rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 500;
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+        .btn-add-color:hover { background-color: #4f46e5; }
+
+        #gradientPreviewBox {
+            width: 100%;
+            min-height: 300px;
+            border-radius: 12px;
+            border: 2px solid var(--border-color);
+            margin-bottom: 1.5rem;
+            transition: background-image 0.2s ease-in-out;
+        }
+
+        #cssCodeOutput {
+            width: 100%;
+            min-height: 100px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.85rem;
+            background-color: #2d3748; /* gray-800 */
+            color: #e2e8f0; /* gray-200 */
+            border-radius: 8px;
+            padding: 1rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        
+        .copy-code-btn {
+            background-color: var(--info-color); color: white; border: none;
+            padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: 600;
+            display: block; width: 100%; margin-top: 0.75rem;
+            font-size: 1rem;
+        }
+        .copy-code-btn:hover { background-color: #2563eb; }
+
+
+        .ad-space {
+            background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 12px;
+            padding: 1.5rem; text-align: center; color: #64748b;
+            margin: 1.5rem 20px 0; 
+            min-height: 100px;
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
+        }
+        .ad-space i { font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5; }
+
+        
+        .hidden { display: none !important; }
+
+        @media (max-width: 991px) { /* Adjust stacking point */
+             .content-wrapper { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .main-container { margin: 10px; border-radius: 15px; }
+            .header .tool-title { font-size: 2rem; }
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            z-index: 3;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            text-decoration: none;
+            transform: translateX(-5px);
+        }        
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <a href="/" class="back-btn">
+                <i class="fas fa-arrow-left"></i> 메인으로
+            </a>            
+            <h3 class="tool-title"><i class="fas fa-palette"></i> CSS 그라데이션 생성기</h3>
+            <p class="tool-description">컬러픽커로 그라데이션을 만들고 코드를 복사하세요</p>
+        </div>
+
+        <div class="tool-section">
+            <div class="content-wrapper">
+                <div class="options-panel"> <div class="form-group">
+                        <label>그라데이션 타입:</label>
+                        <div class="btn-group w-100" role="group" aria-label="Gradient Type">
+                            <input type="radio" class="btn-check" name="gradientType" id="linearType" value="linear" checked>
+                            <label class="btn btn-outline-primary" for="linearType">선형 (Linear)</label>
+                            
+                            <input type="radio" class="btn-check" name="gradientType" id="radialType" value="radial">
+                            <label class="btn btn-outline-primary" for="radialType">방사형 (Radial)</label>
+                        </div>
+                    </div>
+
+                    <div id="colorStopsSection">
+                        <label>색상 정지점 (Color Stops):</label>
+                        <div id="colorStopsContainer" class="mb-2">
+                            </div>
+                        <button type="button" id="addColorStopBtn" class="btn-add-color">
+                            <i class="fas fa-plus-circle"></i> 색상 추가
+                        </button>
+                    </div>
+                    <hr class="my-3">
+
+                    <div id="linearOptionsPanel">
+                        <h5><i class="fas fa-arrows-alt-h"></i> 선형 그라데이션 옵션</h5>
+                        <div class="form-group">
+                            <label for="linearDirectionSelect">방향:</label>
+                            <select class="form-select" id="linearDirectionSelect">
+                                <option value="to right">오른쪽으로 (to right)</option>
+                                <option value="to left">왼쪽으로 (to left)</option>
+                                <option value="to bottom">아래로 (to bottom)</option>
+                                <option value="to top">위로 (to top)</option>
+                                <option value="to bottom right">오른쪽 아래 대각선 (to bottom right)</option>
+                                <option value="to bottom left">왼쪽 아래 대각선 (to bottom left)</option>
+                                <option value="to top right">오른쪽 위 대각선 (to top right)</option>
+                                <option value="to top left">왼쪽 위 대각선 (to top left)</option>
+                                <option value="custom_angle">사용자 정의 각도 (Custom Angle)</option>
+                            </select>
+                        </div>
+                        <div class="form-group hidden" id="linearAngleGroup">
+                            <label for="linearAngleInput">각도 (deg):</label>
+                            <input type="number" class="form-control" id="linearAngleInput" value="90" min="0" max="360">
+                        </div>
+                    </div>
+
+                    <div id="radialOptionsPanel" class="hidden">
+                         <h5><i class="fas fa-bullseye"></i> 방사형 그라데이션 옵션</h5>
+                        <div class="form-group">
+                            <label for="radialShapeSelect">모양 (Shape):</label>
+                            <select class="form-select" id="radialShapeSelect">
+                                <option value="ellipse">타원 (Ellipse)</option>
+                                <option value="circle">원 (Circle)</option>
+                            </select>
+                        </div>
+                         <div class="form-group">
+                            <label for="radialPositionSelect">위치 (Position):</label>
+                            <select class="form-select" id="radialPositionSelect">
+                                <option value="center">중앙 (Center)</option>
+                                <option value="top">상단 (Top)</option>
+                                <option value="bottom">하단 (Bottom)</option>
+                                <option value="left">좌측 (Left)</option>
+                                <option value="right">우측 (Right)</option>
+                                <option value="top left">상단 좌측 (Top Left)</option>
+                                <option value="top right">상단 우측 (Top Right)</option>
+                                <option value="bottom left">하단 좌측 (Bottom Left)</option>
+                                <option value="bottom right">하단 우측 (Bottom Right)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div> <div id="gradientPreviewBox"></div>
+                    <div class="form-group mt-3">
+                        <label for="cssCodeOutput">생성된 CSS 코드:</label>
+                        <textarea id="cssCodeOutput" class="form-control" rows="4" readonly></textarea>
+                    </div>
+                    <button type="button" id="copyCodeBtn" class="copy-code-btn">
+                        <i class="fas fa-copy"></i> CSS 코드 복사
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="ad-space">
+            <i class="fas fa-ad"></i>
+            <h5>광고 영역</h5>
+            <p>Google AdSense 광고가 여기에 표시됩니다</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="container">
+                <div class="row">
+                    <!-- Contact 컬럼 -->
+                    <div class="col-6 col-md-3 footer-col">
+                        <h5 class="footer-col-title">
+                            <i class="fas fa-address-book" style="margin-right: 8px; color: var(--primary-color);"></i>
+                            Contact
+                        </h5>
+                        <ul class="footer-links">
+                            <li>
+                                <a href="https://github.com/seunghwan94" target="_blank" rel="noopener">
+                                    <i class="fab fa-github"></i> GitHub
+                                </a>
+                            </li>
+                            <li>
+                                <a href="mailto:seunghwan94@gmail.com">
+                                    <i class="fas fa-envelope"></i> seunghwan94@gmail.com
+                                </a>
+                            </li>
+                            <li>
+                                <a href="tel:01091050889">
+                                    <i class="fas fa-phone"></i> 010-9105-0889
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://open.kakao.com/o/sjxp87Af" target="_blank" rel="noopener">
+                                    <i class="fab fa-rocketchat"></i> 카카오톡 오픈채팅
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Projects 컬럼 -->
+                    <div class="col-6 col-md-3 footer-col">
+                        <h5 class="footer-col-title">
+                            <i class="fas fa-rocket" style="margin-right: 8px; color: var(--success-color);"></i>
+                            Projects
+                        </h5>
+                        <ul class="footer-links">
+                            <li>
+                                <a href="https://hof.lshwan.com/" target="_blank" rel="noopener">
+                                    <i class="fas fa-home"></i> 가구의 집
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://www.mplace.site" target="_blank" rel="noopener">
+                                    <i class="fas fa-store"></i> m/place 
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" onclick="return false;" style="opacity: 0.6; cursor: not-allowed;">
+                                    <i class="fas fa-tools"></i> Developer Tools Hub
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Location 컬럼 -->
+                    <div class="col-6 col-md-3 footer-col">
+                        <h5 class="footer-col-title">
+                            <i class="fas fa-map-marker-alt" style="margin-right: 8px; color: var(--info-color);"></i>
+                            Location
+                        </h5>
+                        <div class="location-info">
+                            <div style="margin-bottom: 0.75rem;">
+                                <i class="fas fa-building"></i>
+                                서울시 양천구 신월동<br>
+                                <!-- <span style="margin-left: 24px;">대륭포스트타워 2차 203호</span> -->
+                            </div>
+                            <div style="margin-bottom: 0.75rem;">
+                                <i class="fas fa-phone-alt"></i>
+                                전화번호: 010-9105-0889
+                            </div>
+                            <div>
+                                <i class="fas fa-clock"></i>
+                                평일 09:00 - 18:00
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Follow Us 컬럼 -->
+                    <div class="col-6 col-md-3 footer-col">
+                        <h5 class="footer-col-title">
+                            <i class="fas fa-share-alt" style="margin-right: 8px; color: var(--warning-color);"></i>
+                            Follow Us
+                        </h5>
+                        <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 1rem; line-height: 1.5;">
+                            <!-- 최신 도구와 업데이트 소식을 받아보세요! -->
+                        </p>
+                        <div class="social-icons">
+                            <a href="https://github.com/seunghwan94" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub">
+                                <i class="fab fa-github"></i>
+                            </a>
+                            <a href="https://open.kakao.com/o/sjxp87Af" target="_blank" rel="noopener" aria-label="KakaoTalk" title="카카오톡">
+                                <i class="fab fa-rocketchat"></i>
+                            </a>
+                            <a href="mailto:seunghwan94@gmail.com" aria-label="Email" title="이메일">
+                                <i class="fas fa-envelope"></i>
+                            </a>
+                            <a href="tel:01091050889" aria-label="Phone" title="전화">
+                                <i class="fas fa-phone"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Bottom -->
+                <div class="footer-bottom">
+                    <p>© 2025 Mago Lee Developer Tools. 취미로 개발하는 개발자 💻</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="../static/js/footer.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const gradientTypeRadios = document.querySelectorAll('input[name="gradientType"]');
+        const colorStopsContainer = document.getElementById('colorStopsContainer');
+        const addColorStopBtn = document.getElementById('addColorStopBtn');
+        
+        const linearOptionsPanel = document.getElementById('linearOptionsPanel');
+        const linearDirectionSelect = document.getElementById('linearDirectionSelect');
+        const linearAngleGroup = document.getElementById('linearAngleGroup');
+        const linearAngleInput = document.getElementById('linearAngleInput');
+        
+        const radialOptionsPanel = document.getElementById('radialOptionsPanel');
+        const radialShapeSelect = document.getElementById('radialShapeSelect');
+        const radialPositionSelect = document.getElementById('radialPositionSelect');
+        
+        const gradientPreviewBox = document.getElementById('gradientPreviewBox');
+        const cssCodeOutput = document.getElementById('cssCodeOutput');
+        const copyCodeBtn = document.getElementById('copyCodeBtn');
+
+        let colorStops = [];
+        let debounceTimeout;
+
+        function initialize() {
+            // Add initial two color stops
+            addColorStop('#6366f1', 0, false); // Cannot remove first
+            addColorStop('#8b5cf6', 100, false); // Cannot remove second
+            updateGradient();
+
+            gradientTypeRadios.forEach(radio => radio.addEventListener('change', handleGradientTypeChange));
+            addColorStopBtn.addEventListener('click', () => addColorStop(getRandomColor(), 50, true));
+            linearDirectionSelect.addEventListener('change', handleLinearDirectionChange);
+            
+            const optionInputs = [
+                linearDirectionSelect, linearAngleInput, 
+                radialShapeSelect, radialPositionSelect
+            ];
+            optionInputs.forEach(input => input.addEventListener('input', updateGradientDebounced));
+            
+            copyCodeBtn.addEventListener('click', copyCssToClipboard);
+        }
+
+        function addColorStop(color = '#ffffff', position = 50, removable = true) {
+            const stopId = Date.now() + Math.random(); // Unique ID for the stop
+            const stopItem = document.createElement('div');
+            stopItem.className = 'color-stop-item';
+            stopItem.dataset.id = stopId;
+
+            const colorInput = document.createElement('input');
+            colorInput.type = 'color';
+            colorInput.value = color;
+            colorInput.addEventListener('input', updateGradientDebounced);
+
+            const positionSlider = document.createElement('input');
+            positionSlider.type = 'range';
+            positionSlider.min = 0;
+            positionSlider.max = 100;
+            positionSlider.value = position;
+            positionSlider.addEventListener('input', (e) => {
+                positionDisplay.textContent = `${e.target.value}%`;
+                updateGradientDebounced();
+            });
+            
+            const positionDisplay = document.createElement('span');
+            positionDisplay.className = 'position-display';
+            positionDisplay.textContent = `${position}%`;
+
+            stopItem.appendChild(colorInput);
+            stopItem.appendChild(positionSlider);
+            stopItem.appendChild(positionDisplay);
+
+            if (removable) {
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'remove-color-btn';
+                removeBtn.innerHTML = '<i class="fas fa-times-circle"></i>';
+                removeBtn.title = "색상 삭제";
+                removeBtn.addEventListener('click', () => {
+                    stopItem.remove();
+                    updateGradientDebounced();
+                });
+                stopItem.appendChild(removeBtn);
+            }
+            colorStopsContainer.appendChild(stopItem);
+            updateGradientDebounced();
+        }
+        
+        function getSelectedColorStops() {
+            const stops = [];
+            colorStopsContainer.querySelectorAll('.color-stop-item').forEach(item => {
+                const color = item.querySelector('input[type="color"]').value;
+                const position = item.querySelector('input[type="range"]').value;
+                stops.push({ color, position: parseInt(position) });
+            });
+            // Sort stops by position for correct CSS syntax
+            stops.sort((a, b) => a.position - b.position);
+            return stops;
+        }
+
+        function handleGradientTypeChange() {
+            const selectedType = document.querySelector('input[name="gradientType"]:checked').value;
+            if (selectedType === 'linear') {
+                linearOptionsPanel.classList.remove('hidden');
+                radialOptionsPanel.classList.add('hidden');
+                handleLinearDirectionChange(); // To show/hide angle input
+            } else {
+                linearOptionsPanel.classList.add('hidden');
+                radialOptionsPanel.classList.remove('hidden');
+                linearAngleGroup.classList.add('hidden'); // Ensure angle is hidden for radial
+            }
+            updateGradient();
+        }
+
+        function handleLinearDirectionChange() {
+            if (linearDirectionSelect.value === 'custom_angle') {
+                linearAngleGroup.classList.remove('hidden');
+            } else {
+                linearAngleGroup.classList.add('hidden');
+            }
+            updateGradientDebounced();
+        }
+        
+        function updateGradientDebounced() {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(updateGradient, 150);
+        }
+
+        function updateGradient() {
+            const type = document.querySelector('input[name="gradientType"]:checked').value;
+            const stops = getSelectedColorStops();
+
+            if (stops.length < 2) {
+                cssCodeOutput.value = "/* 최소 2개의 색상이 필요합니다. */";
+                gradientPreviewBox.style.backgroundImage = 'none';
+                return;
+            }
+
+            const colorStopCSS = stops.map(s => `${s.color} ${s.position}%`).join(', ');
+            let cssGradient = '';
+
+            if (type === 'linear') {
+                let direction = linearDirectionSelect.value;
+                if (direction === 'custom_angle') {
+                    direction = `${linearAngleInput.value}deg`;
+                }
+                cssGradient = `linear-gradient(${direction}, ${colorStopCSS})`;
+            } else { // radial
+                const shape = radialShapeSelect.value;
+                const position = radialPositionSelect.value;
+                cssGradient = `radial-gradient(${shape} at ${position}, ${colorStopCSS})`;
+            }
+
+            gradientPreviewBox.style.backgroundImage = cssGradient;
+            cssCodeOutput.value = `background-image: ${cssGradient};`;
+        }
+
+        function copyCssToClipboard() {
+            if (!cssCodeOutput.value || cssCodeOutput.value.startsWith("/*")) {
+                alert("복사할 CSS 코드가 없습니다.");
+                return;
+            }
+            navigator.clipboard.writeText(cssCodeOutput.value).then(() => {
+                copyCodeBtn.innerHTML = '<i class="fas fa-check"></i> 복사 완료!';
+                setTimeout(() => {
+                    copyCodeBtn.innerHTML = '<i class="fas fa-copy"></i> CSS 코드 복사';
+                }, 1500);
+            }).catch(err => {
+                alert("클립보드 복사에 실패했습니다.");
+                console.error('Copy failed', err);
+            });
+        }
+        
+        function getRandomColor() {
+            return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+        }
+
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', initialize);
+
+    </script>
+</body>
+</html>

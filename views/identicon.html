@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>온라인 메모장 - Online Notepad</title>
+    <title>픽셀 아바타 생성기 - Pixel Avatar (Identicon) Generator</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
         <!-- 기본 파비콘 (favicon.ico) -->
@@ -28,8 +28,8 @@
     <link href="../static/css/footer.css" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #f59e0b;
-            --secondary-color: #d97706;
+            --primary-color: #374151;
+            --secondary-color: #1f2937;
             --success-color: #10b981;
             --danger-color: #ef4444;
             --warning-color: #f59e0b;
@@ -43,10 +43,9 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
             min-height: 100vh;
             margin: 0; padding: 0;
-            display: flex; flex-direction: column;
         }
 
         .main-container {
@@ -56,15 +55,12 @@
             margin: 20px;
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1; /* Allows main container to take available space */
         }
 
         .header {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
-            padding: 1.5rem 2rem; /* Slightly reduced padding */
+            padding: 2rem;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -86,112 +82,79 @@
             animation: float 20s linear infinite;
         }
         .header .tool-title {
-            font-size: 2.2rem; font-weight: 700; margin-bottom: 0.3rem; position: relative; z-index: 1;
+            font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; position: relative; z-index: 1;
         }
         .header .tool-description {
-            font-size: 1rem; opacity: 0.9; position: relative; z-index: 1; margin: 0;
+            font-size: 1.1rem; opacity: 0.9; position: relative; z-index: 1; margin: 0;
         }
 
         .tool-section {
-            background: white; padding: 1.5rem; /* Reduced padding */
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
+            background: white; padding: 2rem;
+        }
+        
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 1fr; /* Default single column */
+            gap: 2rem;
+        }
+        @media (min-width: 992px) { /* Two columns for large screens */
+            .content-wrapper { grid-template-columns: 2fr 1fr; } 
         }
 
-        #notepadTextArea {
-            flex-grow: 1; /* Textarea takes most space */
-            width: 100%;
+        .identicon-display-area {
+            display: flex; flex-direction: column; align-items: center;
             padding: 1rem;
-            font-size: 1rem;
-            line-height: 1.6;
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            resize: vertical;
-            font-family: 'Georgia', serif; /* A more traditional notepad font */
-            margin-bottom: 1rem;
-            min-height: 300px; /* Minimum height */
         }
-        #notepadTextArea:focus {
+        #identiconCanvas {
+            border: 1px solid var(--border-color);
+            background-color: var(--light-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            image-rendering: pixelated; /* Ensures crisp pixels on zoom */
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+        
+        .options-panel {
+            background-color: var(--light-bg);
+            padding: 1.5rem; border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        .options-panel h5 { font-weight: 600; margin-bottom: 1rem; color: #374151;}
+
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label {
+            display: block; font-weight: 500; margin-bottom: 0.5rem; color: #374151; font-size: 0.9rem;
+        }
+        .form-control, .form-range {
+            width: 100%; padding: 0.75rem; border: 1px solid var(--border-color);
+            border-radius: 8px; font-size: 0.9rem;
+        }
+        input[type="range"] { padding: 0; }
+        .form-control:focus {
             outline: none; border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
-        .actions-panel {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-            align-items: center;
+        .download-btn {
+            background: linear-gradient(135deg, #374151, #1f2937);
+            border: none; color: white; padding: 0.75rem 1.5rem;
+            border-radius: 50px; font-size: 1.1rem; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2);
+            display: block; width: 100%; margin-top: 1.5rem;
         }
-        .action-btn {
-            border: none; color: white; padding: 0.75rem 1.25rem;
-            border-radius: 8px; font-size: 0.9rem; font-weight: 600;
-            cursor: pointer; transition: background-color 0.2s ease, transform 0.2s ease;
-            display: inline-flex; align-items: center; gap: 0.5rem;
-        }
-        .action-btn i { font-size: 0.9em; } /* Slightly smaller icons */
-
-        .btn-save { background-color: var(--success-color); }
-        .btn-save:hover { background-color: #059669; transform: translateY(-1px); }
-        .btn-clear { background-color: var(--danger-color); }
-        .btn-clear:hover { background-color: #c0392b; transform: translateY(-1px); }
-        .btn-download { background-color: var(--info-color); }
-        .btn-download:hover { background-color: #2563eb; transform: translateY(-1px); }
-        
-        .status-bar {
-            font-size: 0.85rem; color: #6b7280;
-            padding: 0.5rem 0.75rem;
-            background-color: var(--light-bg);
-            border-top: 1px solid var(--border-color);
-            border-bottom-left-radius: 20px; /* Match main-container */
-            border-bottom-right-radius: 20px;
-            text-align: right;
-        }
-        .status-bar span + span::before {
-            content: "|";
-            margin: 0 0.5rem;
-            color: var(--border-color);
-        }
-        #saveStatus {
-            font-style: italic;
-            color: var(--success-color);
-            margin-left: 0.75rem;
-        }
-
-        .disclaimer {
-            font-size: 0.8rem;
-            color: #78350f; /* amber-900 */
-            background-color: #fefce8; /* yellow-50 */
-            border: 1px solid #fde047; /* yellow-400 */
-            padding: 0.5rem 0.75rem;
-            border-radius: 6px;
-            margin-top: 0.5rem;
-            text-align: center;
-        }
-        .disclaimer i { margin-right: 0.3rem; }
-
+        .download-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(16, 185, 129, 0.3); }
 
         .ad-space {
             background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 12px;
-            padding: 1.5rem; text-align: center; color: #64748b; /* Reduced padding */
-            margin: 1.5rem 20px 0; /* Adjusted margin to be outside main-container content flow */
-            min-height: 100px; /* Reduced height */
+            padding: 1.5rem; text-align: center; color: #64748b;
+            margin: 1.5rem 20px 0; 
+            min-height: 100px;
             display: flex; align-items: center; justify-content: center; flex-direction: column;
         }
         .ad-space i { font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5; }
-        
 
-        @media (max-width: 768px) {
-            .main-container { margin: 10px; border-radius: 15px; }
-            .header .tool-title { font-size: 1.8rem; }
-            .header .tool-description { font-size: 0.9rem; }
-            .actions-panel { flex-direction: column; align-items: stretch; }
-            .action-btn { width: 100%; justify-content: center; }
-            #notepadTextArea { min-height: 250px; }
-            .status-bar { text-align: center; }
-            .status-bar span + span::before { display: block; content: ""; margin: 0.2rem 0; }
-        }
         .back-btn {
             position: absolute;
             top: 1rem;
@@ -211,7 +174,15 @@
             color: white;
             text-decoration: none;
             transform: translateX(-5px);
-        }        
+        }
+        @media (max-width: 991px) {
+            .content-wrapper { grid-template-columns: 1fr; }
+            .identicon-display-area { order: -1; }
+        }
+        @media (max-width: 768px) {
+            .main-container { margin: 10px; border-radius: 15px; }
+            .header .tool-title { font-size: 2rem; }
+        }
     </style>
 </head>
 <body>
@@ -219,35 +190,43 @@
         <div class="header">
             <a href="/" class="back-btn">
                 <i class="fas fa-arrow-left"></i> 메인으로
-            </a>            
-            <h3 class="tool-title"><i class="fas fa-pencil-alt"></i> 온라인 메모장</h3>
-            <p class="tool-description">언제 어디서나 접근 가능한 클라우드 기반 메모장입니다 <br><small>(실제로는 브라우저에 로컬 저장됩니다)</small></p>
+            </a>          
+            <h3 class="tool-title"><i class="fas fa-id-badge"></i> 픽셀 아바타</h3>
+            <p class="tool-description">문자열 해시로 유니크한 8-비트 아바타를 만듭니다</p>
         </div>
 
         <div class="tool-section">
-            <textarea id="notepadTextArea" placeholder="여기에 메모를 입력하세요..."></textarea>
-            <div class="actions-panel">
-                <button class="action-btn btn-save" id="saveNoteBtn"><i class="fas fa-save"></i> 메모 저장</button>
-                <button class="action-btn btn-clear" id="clearNoteBtn"><i class="fas fa-trash-alt"></i> 메모 지우기</button>
-                <button class="action-btn btn-download" id="downloadNoteBtn"><i class="fas fa-download"></i> TXT로 다운로드</button>
-            </div>
-             <div class="disclaimer">
-                <i class="fas fa-info-circle"></i> <strong>알림:</strong> 이 메모는 현재 사용 중인 브라우저의 로컬 저장소(localStorage)에 저장됩니다. 다른 브라우저나 기기에서는 접근할 수 없습니다.
+            <div class="content-wrapper">
+                 <div class="identicon-display-area"> <canvas id="identiconCanvas" width="250" height="250"></canvas>
+                </div>
+
+                <div class="options-panel"> <h5><i class="fas fa-cogs"></i> 생성 옵션</h5>
+                     <div class="form-group">
+                        <label for="stringInput">문자열 입력:</label>
+                        <input type="text" id="stringInput" class="form-control" placeholder="아이디, 이메일, 닉네임 등" value="identicon">
+                    </div>
+                     <div class="form-group">
+                        <label for="avatarSizeSlider">아바타 크기: <span id="avatarSizeValue">250</span>px</label>
+                        <input type="range" class="form-range" id="avatarSizeSlider" min="50" max="500" step="10" value="250">
+                    </div>
+                     <div class="form-group">
+                        <label for="pixelPaddingSlider">픽셀 간격: <span id="pixelPaddingValue">0.1</span></label>
+                        <input type="range" class="form-range" id="pixelPaddingSlider" min="0" max="0.5" step="0.05" value="0.1">
+                    </div>
+                     <div class="download-btn-container">
+                        <button id="downloadBtn" class="download-btn"><i class="fas fa-download"></i> 아바타 다운로드</button>
+                    </div>
+                </div>
             </div>
         </div>
-         <div class="status-bar">
-            <span id="charCount">문자: 0</span>
-            <span id="wordCount">단어: 0</span>
-            <span id="lastSaved">저장 안됨</span>
-            <span id="saveStatus"></span>
+
+        <div class="ad-space">
+            <i class="fas fa-ad"></i>
+            <h5>광고 영역</h5>
+            <p>Google AdSense 광고가 여기에 표시됩니다</p>
         </div>
     </div>
 
-    <div class="ad-space">
-        <i class="fas fa-ad"></i>
-        <h5>광고 영역</h5>
-        <p>Google AdSense 광고가 여기에 표시됩니다</p>
-    </div>
     <!-- Footer -->
     <footer class="site-footer">
         <div class="footer-content">
@@ -368,108 +347,113 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
-        const notepadTextArea = document.getElementById('notepadTextArea');
-        const saveNoteBtn = document.getElementById('saveNoteBtn');
-        const clearNoteBtn = document.getElementById('clearNoteBtn');
-        const downloadNoteBtn = document.getElementById('downloadNoteBtn');
-        const charCountDisplay = document.getElementById('charCount');
-        const wordCountDisplay = document.getElementById('wordCount');
-        const lastSavedDisplay = document.getElementById('lastSaved');
-        const saveStatusDisplay = document.getElementById('saveStatus');
+        const stringInput = document.getElementById('stringInput');
+        const avatarSizeSlider = document.getElementById('avatarSizeSlider');
+        const avatarSizeValue = document.getElementById('avatarSizeValue');
+        const pixelPaddingSlider = document.getElementById('pixelPaddingSlider');
+        const pixelPaddingValue = document.getElementById('pixelPaddingValue');
+        const identiconCanvas = document.getElementById('identiconCanvas');
+        const downloadBtn = document.getElementById('downloadBtn');
+        let debounceTimeout;
 
-        const STORAGE_KEY_CONTENT = 'onlineNotepadContent';
-        const STORAGE_KEY_TIMESTAMP = 'onlineNotepadTimestamp';
-        let autoSaveTimeout;
+        // --- Event Listeners ---
+        [stringInput, avatarSizeSlider, pixelPaddingSlider].forEach(input => {
+            input.addEventListener('input', () => {
+                // Update value displays immediately
+                if(input.id === 'avatarSizeSlider') avatarSizeValue.textContent = input.value;
+                if(input.id === 'pixelPaddingSlider') pixelPaddingValue.textContent = input.value;
+                
+                // Debounce the actual generation
+                clearTimeout(debounceTimeout);
+                debounceTimeout = setTimeout(generateIdenticon, 150);
+            });
+        });
+        downloadBtn.addEventListener('click', downloadIdenticon);
 
-        function loadNote() {
-            const savedContent = localStorage.getItem(STORAGE_KEY_CONTENT);
-            const savedTimestamp = localStorage.getItem(STORAGE_KEY_TIMESTAMP);
-
-            if (savedContent !== null) {
-                notepadTextArea.value = savedContent;
+        
+        /**
+         * A simple string hashing function (non-cryptographic).
+         * @param {string} str The string to hash.
+         * @returns {number} A 32-bit integer hash.
+         */
+        function simpleHash(str) {
+            let hash = 0;
+            if (str.length === 0) return hash;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash |= 0; // Convert to 32bit integer
             }
-            if (savedTimestamp) {
-                lastSavedDisplay.textContent = `마지막 저장: ${new Date(parseInt(savedTimestamp)).toLocaleString()}`;
-            } else {
-                lastSavedDisplay.textContent = '저장 안됨';
-            }
-            updateStatus();
+            return hash;
         }
 
-        function saveNote(isAutoSave = false) {
-            const content = notepadTextArea.value;
-            const timestamp = Date.now();
+        function generateIdenticon() {
+            const str = stringInput.value;
+            const size = parseInt(avatarSizeSlider.value);
+            const paddingRatio = parseFloat(pixelPaddingSlider.value);
+            const gridSize = 5;
+
+            const hash = simpleHash(str);
+            const absoluteHash = Math.abs(hash);
+
+            // 1. Determine Color from Hash
+            const hue = absoluteHash % 360;
+            const saturation = 60 + (absoluteHash % 21); // 60-80%
+            const lightness = 45 + (absoluteHash % 21); // 45-65%
+            const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+
+            // 2. Determine Pattern from Hash
+            const grid = Array(gridSize).fill(null).map(() => Array(gridSize).fill(false));
             
-            localStorage.setItem(STORAGE_KEY_CONTENT, content);
-            localStorage.setItem(STORAGE_KEY_TIMESTAMP, timestamp.toString());
+            // We need 15 bits for a 5x3 half-grid (center column + 2 others)
+            for (let i = 0; i < 15; i++) {
+                if ((absoluteHash >> i) & 1) {
+                    const row = i % gridSize;
+                    const col = Math.floor(i / gridSize);
+                    grid[row][col] = true;
+                }
+            }
             
-            lastSavedDisplay.textContent = `마지막 저장: ${new Date(timestamp).toLocaleString()}`;
-            if (!isAutoSave) {
-                saveStatusDisplay.textContent = '저장됨!';
-            } else {
-                saveStatusDisplay.textContent = '자동 저장됨.';
+            // Mirror the pattern
+            for (let row = 0; row < gridSize; row++) {
+                for (let col = 0; col < Math.floor(gridSize / 2); col++) {
+                    grid[row][gridSize - 1 - col] = grid[row][col];
+                }
             }
-            setTimeout(() => { saveStatusDisplay.textContent = ''; }, 2000);
-            updateStatus();
-        }
 
-        function clearNote() {
-            if (confirm('정말로 메모를 모두 지우시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-                notepadTextArea.value = '';
-                localStorage.removeItem(STORAGE_KEY_CONTENT);
-                localStorage.removeItem(STORAGE_KEY_TIMESTAMP);
-                lastSavedDisplay.textContent = '저장 안됨';
-                saveStatusDisplay.textContent = '메모 삭제됨.';
-                setTimeout(() => { saveStatusDisplay.textContent = ''; }, 2000);
-                updateStatus();
+            // 3. Draw on Canvas
+            const ctx = identiconCanvas.getContext('2d');
+            identiconCanvas.width = size;
+            identiconCanvas.height = size;
+
+            const totalPadding = size * paddingRatio;
+            const pixelSize = (size - totalPadding) / gridSize;
+            const paddingPerPixel = totalPadding / (gridSize + 1);
+
+            ctx.clearRect(0, 0, size, size);
+            ctx.fillStyle = color;
+
+            for (let row = 0; row < gridSize; row++) {
+                for (let col = 0; col < gridSize; col++) {
+                    if (grid[row][col]) {
+                        const x = paddingPerPixel * (col + 1) + pixelSize * col;
+                        const y = paddingPerPixel * (row + 1) + pixelSize * row;
+                        ctx.fillRect(x, y, pixelSize, pixelSize);
+                    }
+                }
             }
-        }
-
-        function downloadNote() {
-            const content = notepadTextArea.value;
-            if (!content.trim()) {
-                alert("다운로드할 내용이 없습니다.");
-                return;
-            }
-            const filename = `메모_${new Date().toISOString().slice(0,10)}.txt`;
-            const blob = new Blob([content], { type: 'text/plain;charset=utf--8' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(link.href); // Clean up
-        }
-
-        function updateStatus() {
-            const content = notepadTextArea.value;
-            const charCount = content.length;
-            const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
-
-            charCountDisplay.textContent = `문자: ${charCount}`;
-            wordCountDisplay.textContent = `단어: ${wordCount}`;
         }
         
-        function handleAutoSave() {
-            clearTimeout(autoSaveTimeout);
-            saveStatusDisplay.textContent = '변경사항 입력 중...';
-            autoSaveTimeout = setTimeout(() => {
-                saveNote(true); // Pass true for auto-save indication
-            }, 2000); // Auto-save after 2 seconds of inactivity
+        function downloadIdenticon() {
+            const filename = `identicon_${stringInput.value.trim().replace(/\s+/g, '_') || 'default'}.png`;
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = identiconCanvas.toDataURL('image/png');
+            link.click();
         }
 
-        // Event Listeners
-        notepadTextArea.addEventListener('input', () => {
-            updateStatus();
-            handleAutoSave();
-        });
-        saveNoteBtn.addEventListener('click', () => saveNote(false));
-        clearNoteBtn.addEventListener('click', clearNote);
-        downloadNoteBtn.addEventListener('click', downloadNote);
-
-        // Initial load
-        document.addEventListener('DOMContentLoaded', loadNote);
+        // Initial generation
+        document.addEventListener('DOMContentLoaded', generateIdenticon);
     </script>
 </body>
 </html>
