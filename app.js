@@ -108,4 +108,5 @@ app.listen(port, '0.0.0.0', () => {
   console.log(`📍 주소: http://localhost:${port}`);
   console.log(`🛠️  사용 가능한 도구: ${tools.length}개`);
   console.log(`⏰ 시작 시간: ${new Date().toLocaleString('ko-KR')}`);
+  console.log('수정본');
 });
